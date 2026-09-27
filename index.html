@@ -1,12 +1,798 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>零食经线</title>
+  <meta charset="UTF-8"><!--文字编码用utf8格式-->
+  <title>零食经线</title>
+  <style>
+    body {background-color: rgba(246, 253, 246, 0.899);}
+    .正标题{color: rgba(10, 62, 21, 0.625);
+      font-size: 40px;
+      margin-left: 14px;}
+    .副标题{margin-left: 14px;}
+    .main-layout {
+      display: flex;
+      gap: 22px;}
+    .menu {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap:20px;
+      margin-left: 12px;
+      width: 68px;
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 17px rgba(0, 0, 0, 0.08);}
+    .content {
+      margin-right: 15px;
+      flex:1;
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 0 20px 25px;
+      box-shadow: 2px 4px 18px rgba(0, 0, 0, 0.08);}
+    .menu a {
+      color: rgb(124, 134, 124);
+      font-size: 17px;
+      text-decoration: none;
+      width: 66px;
+      height: 44px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+      transition: 0.25s;
+      box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.1);
+      border: 1.5px solid rgba(248, 252, 248, 0.77);
+      background-color: rgba(99, 120, 93, 0.07);}
+    .menu a:hover {
+      color: rgb(255, 255, 255);
+      background-color: rgba(10, 100, 0, 0.377);
+      transform: translateY(-3px);}
+    .menu a.active span {
+      display: none;}
+    .menu a.active.home::after {
+      content: "";
+      display: block;
+      width: 66px;
+      height: 44px;
+      background-image: url("home.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      border-radius: 8px;
+      transform: translateY(-3px);}
+    .menu a.active.music::after {
+      content: "";
+      display: block;
+      width: 66px;
+      height: 44px;
+      background-image: url("music.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      border-radius: 8px;
+      transform: translateY(-3px);}
+    .menu a.active.diary::after {
+      content: "";
+      display: block;
+      width: 66px;
+      height: 44px;
+      background-image: url("diary.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      border-radius: 8px;
+      transform: translateY(-3px);}
+    .menu a.active.works::after {
+      content: "";
+      display: block;
+      width: 66px;
+      height: 44px;
+      background-image: url("works.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      border-radius: 8px;
+      transform: translateY(-3px);}
+    .menu a.active.tasks::after {
+      content: "";
+      display: block;
+      width: 66px;
+      height: 44px;
+      background-image: url("tasks.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      border-radius: 8px;
+      transform: translateY(-3px);}
+    
+    .分割线 {
+      border: none;
+      height: 1.5px;
+      background: linear-gradient(
+        to right,
+        rgba(40, 62, 27, 0.795),
+        rgba(2, 145, 153, 0.678));
+      margin: 50px 0;}
+    .page {
+      display: none;}
+    .page.active {
+      display: block;}
+    #article-title,
+    #article-content {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid rgba(10, 62, 50, 0.15);
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.55);
+      padding: 12px 14px;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 12px;}
+
+    #article-content {
+      min-height: 180px;
+      resize: vertical;
+      font-family: inherit;}
+
+    #article-title:focus,
+    #article-content:focus {
+      border-color: rgba(10, 100, 80, 0.45);
+      box-shadow: 0 0 8px rgba(10, 100, 80, 0.08);}
+
+    #publish-btn {
+      border: none;
+      border-radius: 7px;
+      padding: 10px 22px;
+      background-color: rgba(0, 100, 0, 0.45);
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.25s;}
+
+    #publish-btn:hover {
+      background-color: rgba(0, 100, 0, 0.65);
+      transform: translateY(-2px);}
+    #article-list article {
+      margin-top: 25px;
+      padding: 18px 20px;
+      border-radius: 12px;
+      background-color: rgba(255, 255, 255, 0.35);
+      border: 1px solid rgba(10, 62, 50, 0.08);}
+    #article-list h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: rgba(10, 62, 50, 0.8);}
+
+    #article-list p {
+      margin: 0;
+      line-height: 1.8;}
+    .edit-btn {
+      border: none;
+      border-radius: 6px;
+      padding: 7px 14px;
+      margin-right: 10px;
+      margin-bottom: 5px;
+      margin-top: 15px;
+      background-color: rgba(162, 113, 171, 0.23);
+      color: rgba(67, 1, 85, 0.8);
+      cursor: pointer;
+      transition: 0.2s;}
+
+    .edit-btn:hover {
+      background-color: rgba(88, 9, 167, 0.25);}
+    .delete-btn {
+      border: none;
+      border-radius: 6px;
+      padding: 7px 14px;
+      margin-bottom: 5px;
+      margin-top: 15px;
+      background-color: rgba(180, 80, 80, 0.15);
+      color: rgba(150, 70, 70, 0.849);
+      cursor: pointer;
+      transition: 0.2s;}
+
+    .delete-btn:hover {
+      background-color: rgba(180, 80, 80, 0.35);}
+    #article-list small {
+      display: block;
+      margin-bottom: 10px;
+      color: rgba(10, 62, 50, 0.45);
+      font-size: 13px;}
+
+    /* 猫猫提示框的整个遮罩 */
+  .message-box {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    justify-content: center;
+    align-items: center;
+
+    background-color: transparent;
+}
+
+/* 猫猫本体区域 */
+  .cat-message {
+    position: relative;
+
+    width: 240px;
+    height: 180px;
+
+    background-image: url("cat-message.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* 猫猫里的文字 */
+  #message-text {
+    position: absolute;
+
+    width: 125px;
+
+    left: 50%;
+    top: 72px;
+    transform: translateX(-50%);
+
+    margin: 0;
+
+    text-align: center;
+    white-space: nowrap;
+
+    font-family: "Avenir Next", sans-serif;
+
+    color: rgba(255, 255, 255);
+    font-size: 13.5px;
+    line-height: 2;
+}
+
+/* 猫猫里的“好”按钮 */
+  #message-btn {
+    position: absolute;
+
+    left: 50%;
+    bottom: 35px;
+
+    transform: translateX(-50%);
+
+    border: none;
+    border-radius: 5px;
+
+    padding: 5px 15px;
+
+    background-color: rgba(0, 100, 0, 0.42);
+    color: white;
+
+    font-size: 15px;
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+  #message-btn:hover {
+    background-color: rgba(0, 100, 0, 0.6);
+    transform: translateX(-50%) translateY(-1px);
+}
+
+  #login-box {
+    max-width: 360px;
+    margin-top: 25px;
+    padding: 20px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(10, 62, 50, 0.08);
+}
+
+#login-box input {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(10, 62, 50, 0.15);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.6);
+    font-size: 15px;
+    outline: none;
+}
+
+#login-box button {
+    border: none;
+    border-radius: 7px;
+    padding: 9px 18px;
+    background-color: rgba(0, 100, 0, 0.45);
+    color: white;
+    cursor: pointer;
+}
+
+#login-message {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+  </style>
 </head>
 
 <body>
-    <h1>你好，世界！</h1>
-    <p>这是我的第一个网站。</p>
+  <h1 class="正标题">零食经线</h1>
+  <p class="副标题">碎碎念大窝</p>
+  <hr class="分割线">
+
+  <div class="main-layout">
+    <div class="menu">
+      <a href="#home" class="home">
+        <span>首页</span>
+      </a>
+      <a href="#music" class="music">
+        <span>录音机</span>
+      </a>
+      <a href="#works" class="works">
+        <span>储物间</span>
+      </a>
+      <a href="#diary" class="diary">
+        <span>日记本</span>
+      </a>
+      <a href="#tasks" class="tasks">
+        <span>备忘录</span>
+      </a>
+    </div>
+    <div class="content">
+      <section id="home" class="page active">
+          <h2>首页</h2>
+          <p>欢迎来到零食经线。</p>
+          <div id="login-box">
+          <h3>登录零食经线</h3>
+
+        <input
+        id="login-email"
+        type="email"
+        placeholder="邮箱"
+    >
+
+        <input
+        id="login-password"
+        type="password"
+        placeholder="密码"
+    >
+
+        <button id="login-btn">登录</button>
+
+        <p id="login-message"></p>
+    </div>
+    <div id="user-box" style="display: none;">
+    <p>已登录。</p>
+    <button id="logout-btn">退出登录</button>
+    </div>
+         
+      </section>
+      <section id="music" class="page">
+          <h2>录音机</h2>
+          <p>这里以后放喜欢的音乐。</p>
+      </section>
+      <section id="works" class="page">
+          <h2>储物间</h2>
+          <p>这里以后放我的作品。</p>
+      </section>
+      <section id="diary" class="page">
+          <h2>日记本</h2>
+          <input id="article-title" type="text" placeholder="标题">
+          <textarea id="article-content" placeholder="写点什么……"></textarea>
+          <button id="publish-btn">发布</button>
+          <div id="article-list"></div>
+      </section>
+      <section id="tasks" class="page">
+          <h2>备忘录</h2>
+          <p>这里以后放我的任务。</p>
+      </section>
+    </div>
+  </div>
+
+  <div id="message-box" class="message-box">
+    <div class="cat-message">
+        <p id="message-text"></p>
+        <button id="message-btn">好</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+
+    const SUPABASE_URL = 'https://zcaunceikzbpaqqjtido.supabase.co';
+
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Tlv_4AXjzi-ZOe0Vxr1cLQ_9CSfoM8D';
+
+    const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);  
+
+    let editingId = null;
+
+const links = document.querySelectorAll('.menu a');
+const pages = document.querySelectorAll('.page');
+
+const titleInput = document.querySelector('#article-title');
+const contentInput = document.querySelector('#article-content');
+const publishButton = document.querySelector('#publish-btn');
+const articleList = document.querySelector('#article-list');
+
+let articles = [];
+
+
+// =========================
+// 文章：从 Supabase 读取
+// =========================
+
+async function loadArticles() {
+    const { data, error } = await supabaseClient
+        .from('articles')
+        .select('*')
+        .order('id', { ascending: true });
+
+    if (error) {
+        console.error('读取文章失败：', error);
+        showMessage('读取文章失败了');
+        return;
+    }
+
+    articles = data;
+    renderArticles();
+}
+
+
+// =========================
+// 文章：显示在页面上
+// =========================
+
+function renderArticles() {
+    articleList.innerHTML = '';
+
+    articles.forEach((article) => {
+        const articleElement = document.createElement('article');
+
+        const titleElement = document.createElement('h3');
+        titleElement.textContent = article.title;
+
+        const dateElement = document.createElement('small');
+        dateElement.textContent = article.date || '';
+
+        const contentElement = document.createElement('p');
+        contentElement.textContent = article.content;
+
+
+        // 修改按钮
+        const editButton = document.createElement('button');
+        editButton.textContent = '修改';
+        editButton.classList.add('edit-btn');
+
+        editButton.addEventListener('click', function() {
+            titleInput.value = article.title;
+            contentInput.value = article.content;
+
+            // 记住数据库里的真正 id
+            editingId = article.id;
+
+            publishButton.textContent = '保存修改';
+        });
+
+
+        // 删除按钮
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = '删除';
+        deleteButton.classList.add('delete-btn');
+
+        deleteButton.addEventListener('click', async function() {
+
+            const { error } = await supabaseClient
+                .from('articles')
+                .delete()
+                .eq('id', article.id);
+
+            if (error) {
+                console.error('删除文章失败：', error);
+                showMessage('删除失败了');
+                return;
+            }
+
+            await loadArticles();
+
+            showMessage('完成了');
+        });
+
+
+        articleElement.appendChild(titleElement);
+        articleElement.appendChild(dateElement);
+        articleElement.appendChild(contentElement);
+        articleElement.appendChild(editButton);
+        articleElement.appendChild(deleteButton);
+
+        articleList.appendChild(articleElement);
+    });
+}
+
+
+// =========================
+// 发布 / 修改文章
+// =========================
+
+publishButton.addEventListener('click', async function() {
+
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
+
+    if (!title || !content) {
+        showMessage('不能为空哦！');
+        return;
+    }
+
+
+    // =========================
+    // 修改已有文章
+    // =========================
+
+    if (editingId !== null) {
+
+        const { error } = await supabaseClient
+            .from('articles')
+            .update({
+                title: title,
+                content: content
+            })
+            .eq('id', editingId);
+
+        if (error) {
+            console.error('修改文章失败：', error);
+            showMessage('修改失败了');
+            return;
+        }
+
+        await loadArticles();
+
+        titleInput.value = '';
+        contentInput.value = '';
+
+        editingId = null;
+
+        publishButton.textContent = '发布';
+
+        showMessage('修改好了(>^ω^<)');
+
+        return;
+    }
+
+
+    // =========================
+    // 发布新文章
+    // =========================
+
+    const article = {
+        title: title,
+        content: content,
+        date: new Date().toLocaleString()
+    };
+
+    const { error } = await supabaseClient
+        .from('articles')
+        .insert([article]);
+
+    if (error) {
+        console.error('发布文章失败：', error);
+        showMessage('发布失败了');
+        return;
+    }
+
+    await loadArticles();
+
+    titleInput.value = '';
+    contentInput.value = '';
+
+    showMessage('收到(>^ω^<)');
+});
+
+
+// =========================
+// 页面导航
+// =========================
+
+links.forEach(link => {
+
+    link.addEventListener('click', async function(event) {
+
+        event.preventDefault();
+
+        const targetId = link.getAttribute('href');
+
+
+        // 检查当前有没有登录
+        const { data } = await supabaseClient.auth.getSession();
+        const session = data.session;
+
+
+        // 没登录却想进入日记本
+        if (targetId === '#diary' && !session) {
+            showMessage('未登录！');
+            return;
+        }
+
+
+        // 切换按钮的 active
+        links.forEach(item => {
+            item.classList.remove('active');
+        });
+
+        link.classList.add('active');
+
+
+        // 切换页面
+        pages.forEach(page => {
+            page.classList.remove('active');
+        });
+
+        document.querySelector(targetId).classList.add('active');
+    });
+
+});
+
+
+// =========================
+// 猫猫提示框
+// =========================
+
+const messageBox = document.querySelector('#message-box');
+const messageText = document.querySelector('#message-text');
+const messageButton = document.querySelector('#message-btn');
+
+function showMessage(message) {
+    messageText.textContent = message;
+    messageBox.style.display = 'flex';
+}
+
+messageButton.addEventListener('click', function() {
+    messageBox.style.display = 'none';
+});
+
+
+// =========================
+// 登录相关
+// =========================
+
+const loginBox = document.querySelector('#login-box');
+const userBox = document.querySelector('#user-box');
+
+const loginEmail = document.querySelector('#login-email');
+const loginPassword = document.querySelector('#login-password');
+const loginButton = document.querySelector('#login-btn');
+const loginMessage = document.querySelector('#login-message');
+const logoutButton = document.querySelector('#logout-btn');
+
+
+// 输入时清除旧错误提示
+loginEmail.addEventListener('input', function() {
+    loginMessage.textContent = '';
+});
+
+loginPassword.addEventListener('input', function() {
+    loginMessage.textContent = '';
+});
+
+
+// =========================
+// 点击登录
+// =========================
+
+loginButton.addEventListener('click', async function() {
+
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value;
+
+
+    if (!email || !password) {
+        loginMessage.textContent = '邮箱和密码都要填写哦。';
+        return;
+    }
+
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
+
+
+    if (error) {
+        loginMessage.textContent = '登录失败';
+        return;
+    }
+
+
+    console.log('登录成功：', data.user);
+
+
+    // 清除旧的错误提示
+    loginMessage.textContent = '';
+
+
+    // 隐藏登录框
+    loginBox.style.display = 'none';
+
+    // 显示已登录状态
+    userBox.style.display = 'block';
+
+
+    // 登录后读取文章
+    await loadArticles();
+});
+
+
+// =========================
+// 点击退出登录
+// =========================
+
+logoutButton.addEventListener('click', async function() {
+
+    await supabaseClient.auth.signOut();
+
+
+    // 清除登录失败提示
+    loginMessage.textContent = '';
+
+
+    // 恢复登录框
+    loginBox.style.display = 'block';
+
+    // 隐藏用户状态
+    userBox.style.display = 'none';
+
+
+    // 清空文章
+    articles = [];
+    renderArticles();
+
+
+    // 清除正在编辑的文章状态
+    editingId = null;
+
+    titleInput.value = '';
+    contentInput.value = '';
+
+    publishButton.textContent = '发布';
+});
+
+
+// =========================
+// 检查当前登录状态
+// =========================
+
+async function updateLoginUI() {
+
+    const { data } = await supabaseClient.auth.getSession();
+
+    const session = data.session;
+
+
+    if (session) {
+
+        // 已登录
+        loginBox.style.display = 'none';
+        userBox.style.display = 'block';
+
+        // 读取文章
+        await loadArticles();
+
+    } else {
+
+        // 未登录
+        loginBox.style.display = 'block';
+        userBox.style.display = 'none';
+
+        // 未登录时清空文章
+        articles = [];
+        renderArticles();
+    }
+}
+
+    updateLoginUI();
+  </script>
 </body>
 </html>
