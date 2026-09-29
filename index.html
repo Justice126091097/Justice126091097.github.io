@@ -276,6 +276,7 @@
     transform: translateX(-50%) translateY(-1px);
 }
 
+  #user-box,
   #login-box {
     max-width: 360px;
     margin-top: 25px;
@@ -297,10 +298,11 @@
     outline: none;
 }
 
+#user-box button,
 #login-box button {
     border: none;
-    border-radius: 7px;
-    padding: 9px 18px;
+    border-radius: 6px;
+    padding: 12px 18px;
     background-color: rgba(0, 100, 0, 0.45);
     color: white;
     cursor: pointer;
@@ -342,24 +344,20 @@
           <h2>首页</h2>
           <p>欢迎来到零食经线。</p>
           <div id="login-box">
-          <h3>登录零食经线</h3>
+    <h3>登录零食经线</h3>
 
-        <input
-        id="login-email"
-        type="email"
-        placeholder="邮箱"
-    >
-
-        <input
+    <input
         id="login-password"
         type="password"
-        placeholder="密码"
+        placeholder="请输入密码"
     >
 
-        <button id="login-btn">登录</button>
+      <button id="login-btn">登录</button>
 
-        <p id="login-message"></p>
-    </div>
+      <p id="login-message"></p>
+      </div>
+
+  
     <div id="user-box" style="display: none;">
     <p>已登录。</p>
     <button id="logout-btn">退出登录</button>
@@ -409,16 +407,17 @@
 );  
 
     let editingId = null;
+    let isEditor = false;
 
-const links = document.querySelectorAll('.menu a');
-const pages = document.querySelectorAll('.page');
+  const links = document.querySelectorAll('.menu a');
+  const pages = document.querySelectorAll('.page');
 
-const titleInput = document.querySelector('#article-title');
-const contentInput = document.querySelector('#article-content');
-const publishButton = document.querySelector('#publish-btn');
-const articleList = document.querySelector('#article-list');
+  const titleInput = document.querySelector('#article-title');
+  const contentInput = document.querySelector('#article-content');
+  const publishButton = document.querySelector('#publish-btn');
+  const articleList = document.querySelector('#article-list');
 
-let articles = [];
+  let articles = [];
 
 
 // =========================
@@ -450,6 +449,7 @@ function renderArticles() {
     articleList.innerHTML = '';
 
     articles.forEach((article) => {
+
         const articleElement = document.createElement('article');
 
         const titleElement = document.createElement('h3');
@@ -462,56 +462,100 @@ function renderArticles() {
         contentElement.textContent = article.content;
 
 
+        // =========================
         // 修改按钮
-        const editButton = document.createElement('button');
-        editButton.textContent = '修改';
-        editButton.classList.add('edit-btn');
+        // =========================
 
-        editButton.addEventListener('click', function() {
-            titleInput.value = article.title;
-            contentInput.value = article.content;
+        let editButton = null;
+        let deleteButton = null;
 
-            // 记住数据库里的真正 id
-            editingId = article.id;
+        if (isEditor) {
 
-            publishButton.textContent = '保存修改';
-        });
+            editButton = document.createElement('button');
+
+            editButton.textContent = '修改';
+            editButton.classList.add('edit-btn');
+
+            editButton.addEventListener('click', function() {
+
+                titleInput.value = article.title;
+                contentInput.value = article.content;
+
+                editingId = article.id;
+
+                publishButton.textContent = '保存修改';
+            });
 
 
-        // 删除按钮
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = '删除';
-        deleteButton.classList.add('delete-btn');
+            // =========================
+            // 删除按钮
+            // =========================
 
-        deleteButton.addEventListener('click', async function() {
+            deleteButton = document.createElement('button');
 
-            const { error } = await supabaseClient
-                .from('articles')
-                .delete()
-                .eq('id', article.id);
+            deleteButton.textContent = '删除';
+            deleteButton.classList.add('delete-btn');
 
-            if (error) {
-                console.error('删除文章失败：', error);
-                showMessage('删除失败了');
-                return;
-            }
+            deleteButton.addEventListener('click', async function() {
 
-            await loadArticles();
+                const { error } = await supabaseClient
+                    .from('articles')
+                    .delete()
+                    .eq('id', article.id);
 
-            showMessage('完成了');
-        });
+                if (error) {
+                    console.error('删除文章失败：', error);
+                    showMessage('删除失败了');
+                    return;
+                }
 
+                await loadArticles();
+
+                showMessage('完成了');
+            });
+        }
+
+
+        // =========================
+        // 文章内容
+        // =========================
 
         articleElement.appendChild(titleElement);
         articleElement.appendChild(dateElement);
         articleElement.appendChild(contentElement);
-        articleElement.appendChild(editButton);
-        articleElement.appendChild(deleteButton);
+
+
+        // =========================
+        // 按钮放在文章下面
+        // =========================
+
+        if (isEditor) {
+            articleElement.appendChild(editButton);
+            articleElement.appendChild(deleteButton);
+        }
+
 
         articleList.appendChild(articleElement);
     });
 }
 
+function updateEditorUI() {
+
+    if (isEditor) {
+
+        titleInput.style.display = 'block';
+        contentInput.style.display = 'block';
+        publishButton.style.display = 'inline-block';
+
+    } else {
+
+        titleInput.style.display = 'none';
+        contentInput.style.display = 'none';
+        publishButton.style.display = 'none';
+
+    }
+
+}
 
 // =========================
 // 发布 / 修改文章
@@ -661,17 +705,15 @@ messageButton.addEventListener('click', function() {
 const loginBox = document.querySelector('#login-box');
 const userBox = document.querySelector('#user-box');
 
-const loginEmail = document.querySelector('#login-email');
 const loginPassword = document.querySelector('#login-password');
 const loginButton = document.querySelector('#login-btn');
 const loginMessage = document.querySelector('#login-message');
 const logoutButton = document.querySelector('#logout-btn');
 
+const EDITOR_EMAIL = 'gg200812@icloud.com';
+const VIEWER_EMAIL = '126091097@link.cuhk.edu.cn';
 
 // 输入时清除旧错误提示
-loginEmail.addEventListener('input', function() {
-    loginMessage.textContent = '';
-});
 
 loginPassword.addEventListener('input', function() {
     loginMessage.textContent = '';
@@ -684,32 +726,49 @@ loginPassword.addEventListener('input', function() {
 
 loginButton.addEventListener('click', async function() {
 
-    const email = loginEmail.value.trim();
     const password = loginPassword.value;
 
 
-    if (!email || !password) {
-        loginMessage.textContent = '邮箱和密码都要填写哦。';
+    if (!password) {
+        loginMessage.textContent = '请输入密码哦。';
         return;
     }
 
 
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email: email,
+    // 先尝试编辑者账号
+    let result = await supabaseClient.auth.signInWithPassword({
+        email: EDITOR_EMAIL,
         password: password
     });
 
 
-    if (error) {
+    // 编辑者密码不对，再尝试查看者账号
+    if (result.error) {
+        result = await supabaseClient.auth.signInWithPassword({
+            email: VIEWER_EMAIL,
+            password: password
+        });
+    }
+
+
+    // 两个账号都登录失败
+    if (result.error) {
         loginMessage.textContent = '登录失败';
         return;
     }
 
 
-    console.log('登录成功：', data.user);
+    // 登录成功
+    const user = result.data.user;
+
+    console.log('登录成功：', user);
 
 
-    // 清除旧的错误提示
+    // 判断当前是不是编辑者
+    isEditor = user.email === EDITOR_EMAIL;
+
+
+    // 清除错误提示
     loginMessage.textContent = '';
 
 
@@ -720,10 +779,13 @@ loginButton.addEventListener('click', async function() {
     userBox.style.display = 'block';
 
 
-    // 登录后读取文章
+    // 根据身份显示对应界面
+    updateEditorUI();
+
+
+    // 读取文章
     await loadArticles();
 });
-
 
 // =========================
 // 点击退出登录
@@ -733,30 +795,24 @@ logoutButton.addEventListener('click', async function() {
 
     await supabaseClient.auth.signOut();
 
+loginMessage.textContent = '';
 
-    // 清除登录失败提示
-    loginMessage.textContent = '';
+loginBox.style.display = 'block';
+userBox.style.display = 'none';
 
+isEditor = false;
 
-    // 恢复登录框
-    loginBox.style.display = 'block';
+updateEditorUI();
 
-    // 隐藏用户状态
-    userBox.style.display = 'none';
+articles = [];
+renderArticles();
 
+editingId = null;
 
-    // 清空文章
-    articles = [];
-    renderArticles();
+titleInput.value = '';
+contentInput.value = '';
 
-
-    // 清除正在编辑的文章状态
-    editingId = null;
-
-    titleInput.value = '';
-    contentInput.value = '';
-
-    publishButton.textContent = '发布';
+publishButton.textContent = '发布';
 });
 
 
@@ -764,7 +820,7 @@ logoutButton.addEventListener('click', async function() {
 // 检查当前登录状态
 // =========================
 
-async function updateLoginUI() {
+    async function updateLoginUI() {
 
     const { data } = await supabaseClient.auth.getSession();
 
@@ -773,24 +829,29 @@ async function updateLoginUI() {
 
     if (session) {
 
-        // 已登录
         loginBox.style.display = 'none';
         userBox.style.display = 'block';
 
-        // 读取文章
+        isEditor = session.user.email === 'gg200812@icloud.com';
+
+        updateEditorUI();
+
         await loadArticles();
 
     } else {
 
-        // 未登录
         loginBox.style.display = 'block';
         userBox.style.display = 'none';
 
-        // 未登录时清空文章
+        isEditor = false;
+
+        updateEditorUI();
+
         articles = [];
         renderArticles();
     }
 }
+
 
     updateLoginUI();
   </script>
