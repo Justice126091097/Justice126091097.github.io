@@ -309,6 +309,67 @@
     aspect-ratio: 1 / 1;
     object-fit: cover;
     margin-top: 0;
+    cursor: zoom-in;
+    transition: transform 0.15s;
+}
+
+.work-image-card img:hover {
+    transform: scale(1.02);
+}
+
+.work-delete-btn {
+    display: block;
+    margin: 8px auto 0;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    background-color: rgba(180, 80, 80, 0.15);
+    color: rgba(150, 70, 70, 0.849);
+    cursor: pointer;
+    transition: 0.1s;
+}
+
+.work-delete-btn:hover {
+    background-color: rgba(180, 80, 80, 0.35);
+}
+
+#work-image-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.72);
+    box-sizing: border-box;
+    cursor: zoom-out;
+}
+
+#work-image-modal img {
+    max-width: 92vw;
+    max-height: 92vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 8px 35px rgba(0, 0, 0, 0.35);
+    cursor: default;
+}
+
+#work-image-close {
+    position: fixed;
+    top: 18px;
+    right: 20px;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.85);
+    color: rgba(10, 62, 50, 0.85);
+    font-size: 24px;
+    line-height: 40px;
+    cursor: pointer;
 }
 
   #user-box,
@@ -524,6 +585,11 @@
     </div>
   </div>
 
+  <div id="work-image-modal">
+    <button id="work-image-close" type="button" aria-label="关闭">×</button>
+    <img id="work-image-preview" src="" alt="原图预览">
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
@@ -557,6 +623,10 @@
     const worksList = document.querySelector('#works-list');
     const worksUploadBox = document.querySelector('#works-upload-box');
 
+    const workImageModal = document.querySelector('#work-image-modal');
+    const workImagePreview = document.querySelector('#work-image-preview');
+    const workImageClose = document.querySelector('#work-image-close');
+
     let articles = [];
 
 
@@ -575,6 +645,33 @@
 
     messageButton.addEventListener('click', function() {
         messageBox.style.display = 'none';
+    });
+
+    function openWorkImage(url) {
+        workImagePreview.src = url;
+        workImageModal.style.display = 'flex';
+    }
+
+    function closeWorkImage() {
+        workImageModal.style.display = 'none';
+        workImagePreview.src = '';
+    }
+
+    workImageClose.addEventListener('click', function(event) {
+        event.stopPropagation();
+        closeWorkImage();
+    });
+
+    workImageModal.addEventListener('click', function(event) {
+        if (event.target === workImageModal) {
+            closeWorkImage();
+        }
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeWorkImage();
+        }
     });
 
 
@@ -1127,8 +1224,44 @@
             const image = document.createElement('img');
             image.src = signedData.signedUrl;
             image.alt = '作品';
+            image.addEventListener('click', function() {
+                openWorkImage(signedData.signedUrl);
+            });
 
             card.appendChild(image);
+
+            if (isEditor) {
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.textContent = '删除';
+                deleteButton.classList.add('work-delete-btn');
+
+                deleteButton.addEventListener('click', async function(event) {
+                    event.stopPropagation();
+
+                    const shouldDelete = window.confirm('确定要删除这张作品照片吗？');
+                    if (!shouldDelete) {
+                        return;
+                    }
+
+                    const { error: deleteError } = await supabaseClient
+                        .storage
+                        .from(STORAGE_BUCKET)
+                        .remove([path]);
+
+                    if (deleteError) {
+                        console.error('删除作品照片失败：', deleteError);
+                        showMessage('删除失败了');
+                        return;
+                    }
+
+                    showMessage('删除好了');
+                    await loadWorksImages();
+                });
+
+                card.appendChild(deleteButton);
+            }
+
             worksList.appendChild(card);
         }
     }
